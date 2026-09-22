@@ -1,0 +1,22 @@
+# Dependencies & Builds
+node_modules/
+dist/
+target/
+*.class
+*.jar
+*.war
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Local Database & Logs
+data/
+*.log
+.mvn/wrapper/maven-wrapper.jar
+
+# Environment files
+.env
+.env.local

@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database Service
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: retailinsight-db
+    restart: always
+    environment:
+      POSTGRES_DB: retailinsight
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot Backend Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: retailinsight-backend
+    restart: always
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/retailinsight
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgrespassword
+      APP_JWT_SECRET: RetailInsightSuperSecretKeyForJWTGenerationMustBeAtLeast256BitsLong2026!
+    ports:
+      - "8080:8080"
+
+  # React Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: retailinsight-frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  postgres_data:

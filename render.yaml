@@ -1,0 +1,40 @@
+# Render Blueprint for RetailInsight deployment
+# Automatically provisions PostgreSQL Database, Spring Boot Web Service, and React Static Site.
+
+databases:
+  - name: retailinsight-postgres
+    databaseName: retailinsight
+    user: retailinsight_user
+    plan: free
+
+services:
+  # Spring Boot Backend API Web Service
+  - type: web
+    name: retailinsight-backend
+    runtime: docker
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    plan: free
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: postgres
+      - key: DATABASE_URL
+        fromDatabase:
+          name: retailinsight-postgres
+          property: connectionString
+      - key: APP_JWT_SECRET
+        generateValue: true
+
+  # React Frontend Static Site / Web Service
+  - type: web
+    name: retailinsight-frontend
+    runtime: docker
+    dockerContext: ./frontend
+    dockerfilePath: ./frontend/Dockerfile
+    plan: free
+    envVars:
+      - key: BACKEND_URL
+        fromService:
+          type: web
+          name: retailinsight-backend
+          property: host
