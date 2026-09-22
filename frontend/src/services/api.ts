@@ -21,7 +21,7 @@ import {
   WholesaleSummary,
 } from '../types';
 
-const rawBase = import.meta.env.VITE_API_URL || '';
+const rawBase = ((import.meta as any).env?.VITE_API_URL as string) || '';
 const API_BASE = rawBase ? `${rawBase.replace(/\/$/, '')}/api` : '/api';
 
 function getAuthToken(): string | null {
