@@ -12,7 +12,8 @@ import {
   AlertTriangle,
   Building2,
   PackagePlus,
-  ClipboardList
+  ClipboardList,
+  Database
 } from 'lucide-react';
 
 export type TabType =
@@ -23,6 +24,7 @@ export type TabType =
   | 'wholesale'
   | 'invoices'
   | 'barcode'
+  | 'schema'
   | 'wholesale-dashboard'
   | 'wholesale-catalog'
   | 'wholesale-orders';
@@ -166,6 +168,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <span>Barcode & Label Studio</span>
                 </div>
               </button>
+
+              <button
+                onClick={() => setActiveTab('schema')}
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                  activeTab === 'schema'
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Database className="w-4 h-4 text-emerald-400" />
+                  <span>Database & Schema</span>
+                </div>
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-mono">
+                  PostgreSQL
+                </span>
+              </button>
             </nav>
           </div>
         ) : (
@@ -234,6 +253,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <Barcode className="w-4 h-4" />
                   <span>Barcode Tools</span>
                 </div>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('schema')}
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                  activeTab === 'schema'
+                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Database className="w-4 h-4 text-emerald-400" />
+                  <span>Database & Schema</span>
+                </div>
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-mono">
+                  PostgreSQL
+                </span>
               </button>
             </nav>
           </div>

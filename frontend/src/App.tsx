@@ -8,6 +8,7 @@ import { POSCheckoutPage } from './pages/POSCheckoutPage';
 import { ProfitabilityMatrixPage } from './pages/ProfitabilityMatrixPage';
 import { WholesaleMarketplacePage } from './pages/WholesaleMarketplacePage';
 import { BarcodeToolsPage } from './pages/BarcodeToolsPage';
+import { DatabaseSchemaPage } from './pages/DatabaseSchemaPage';
 import { InvoicesPage } from './pages/InvoicesPage';
 import { AuthPage } from './pages/AuthPage';
 import { productApi, wholesaleApi } from './services/api';
@@ -108,6 +109,8 @@ export const App: React.FC = () => {
           {activeTab === 'invoices' && <InvoicesPage />}
 
           {activeTab === 'barcode' && <BarcodeToolsPage />}
+
+          {activeTab === 'schema' && <DatabaseSchemaPage />}
         </main>
       </div>
     </div>

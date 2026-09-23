@@ -1,8 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { SaleOrder } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { pdfApi } from '../services/api';
-import { X, Printer, Download, Receipt, CheckCircle, Percent } from 'lucide-react';
+import { X, Printer, Download, Receipt, CheckCircle, Percent, Lock, Eye, EyeOff } from 'lucide-react';
 import JsBarcode from 'jsbarcode';
 
 interface InvoiceReceiptModalProps {
@@ -13,6 +13,7 @@ interface InvoiceReceiptModalProps {
 export const InvoiceReceiptModal: React.FC<InvoiceReceiptModalProps> = ({ order, onClose }) => {
   const { user } = useAuth();
   const barcodeRef = useRef<SVGSVGElement>(null);
+  const [showConfidentialMargin, setShowConfidentialMargin] = useState(true);
 
   useEffect(() => {
     if (order && barcodeRef.current) {
@@ -52,17 +53,44 @@ export const InvoiceReceiptModal: React.FC<InvoiceReceiptModalProps> = ({ order,
           <X className="w-5 h-5" />
         </button>
 
-        <div className="flex items-center gap-3 mb-4 no-print">
+        <div className="flex items-center gap-3 mb-3 no-print">
           <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
             <CheckCircle className="w-5 h-5" />
           </div>
           <div>
             <h3 className="text-base font-bold text-white">Sale Completed Successfully</h3>
-            <p className="text-xs text-slate-400">Invoice #{order.orderNumber}</p>
+            <p className="text-xs text-slate-400">Customer Tax Invoice #{order.orderNumber}</p>
           </div>
         </div>
 
-        {/* Printable Receipt Paper Container */}
+        {/* Cashier / Store Manager Confidential Margin Badge (Placed OUTSIDE the customer receipt) */}
+        <div className="mb-3 p-3 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-300 flex items-center justify-between no-print shadow-sm">
+          <div className="flex items-center gap-2">
+            <Lock className="w-4 h-4 text-amber-400 flex-shrink-0" />
+            <div>
+              <span className="font-bold text-slate-200">Shopkeeper Private Margin:</span>
+              <p className="text-[10px] text-slate-400">Confidential store telemetry (Never shown on customer bill / PDF)</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            {showConfidentialMargin ? (
+              <span className="font-mono font-black text-emerald-400 text-sm">
+                +₹{order.totalProfit?.toFixed(2)} ({order.profitMarginPercent}%)
+              </span>
+            ) : (
+              <span className="text-xs text-slate-500 font-mono">••••••</span>
+            )}
+            <button
+              onClick={() => setShowConfidentialMargin(!showConfidentialMargin)}
+              className="p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+              title={showConfidentialMargin ? 'Hide confidential margin' : 'Show confidential margin'}
+            >
+              {showConfidentialMargin ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Pristine Customer-Facing Receipt Paper Container (What customer receives) */}
         <div
           id="printable-receipt"
           className="bg-white text-slate-900 p-6 rounded-xl border border-slate-200 shadow-inner overflow-y-auto flex-1 text-xs"
@@ -142,21 +170,10 @@ export const InvoiceReceiptModal: React.FC<InvoiceReceiptModalProps> = ({ order,
             </div>
           </div>
 
-          {/* Cashier Profit & Margin Summary (Retailer Only) */}
-          <div className="mt-4 p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-between text-[11px] font-semibold no-print">
-            <span className="flex items-center gap-1">
-              <Percent className="w-3.5 h-3.5" />
-              <span>Net Profit Earned:</span>
-            </span>
-            <span className="font-mono font-bold">
-              ₹{order.totalProfit?.toFixed(2)} ({order.profitMarginPercent}% Margin)
-            </span>
-          </div>
-
           {/* Barcode representation */}
           <div className="mt-4 flex flex-col items-center justify-center text-center">
             <svg ref={barcodeRef} className="max-w-full"></svg>
-            <p className="text-[10px] text-slate-400 mt-1">Thank you for your business!</p>
+            <p className="text-[10px] text-slate-400 mt-1">Thank you for shopping with us!</p>
           </div>
         </div>
 
@@ -174,14 +191,14 @@ export const InvoiceReceiptModal: React.FC<InvoiceReceiptModalProps> = ({ order,
               className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
             >
               <Download className="w-4 h-4 text-blue-400" />
-              <span>Download PDF</span>
+              <span>Download Customer PDF</span>
             </button>
             <button
               onClick={handlePrint}
               className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30 transition-colors active:scale-95"
             >
               <Printer className="w-4 h-4" />
-              <span>Print Invoice</span>
+              <span>Print Customer Bill</span>
             </button>
           </div>
         </div>
