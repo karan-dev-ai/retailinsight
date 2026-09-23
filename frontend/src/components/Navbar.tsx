@@ -10,7 +10,10 @@ import {
   ChevronDown,
   Sparkles,
   Barcode,
-  ShoppingCart
+  ShoppingCart,
+  Smartphone,
+  X,
+  QrCode
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -23,6 +26,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenPos, onOpenBarcodeTools, l
   const { user, role, quickLoginAsRole, logout } = useAuth();
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [showMobileQrModal, setShowMobileQrModal] = useState(false);
 
   const getRoleBadge = () => {
     switch (role) {
@@ -51,28 +55,41 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenPos, onOpenBarcodeTools, l
   const badge = getRoleBadge();
   const BadgeIcon = badge.icon;
 
+  const liveAppUrl = typeof window !== 'undefined' ? window.location.origin : 'https://retailinsight-git-main-ai-era3.vercel.app';
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(liveAppUrl)}&bgcolor=ffffff&color=020617&margin=10`;
+
   return (
-    <header className="sticky top-0 z-30 h-16 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between">
+    <header className="sticky top-0 z-30 h-16 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md px-3 sm:px-6 flex items-center justify-between">
       {/* Brand */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/25">
+      <div className="flex items-center gap-2.5">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/25 shrink-0">
           <Store className="w-5 h-5 text-white" />
         </div>
         <div>
-          <div className="flex items-center gap-2">
-            <span className="font-extrabold text-lg tracking-tight text-white">RetailInsight</span>
-            <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">
-              v1.0 SaaS
+          <div className="flex items-center gap-1.5">
+            <span className="font-extrabold text-base sm:text-lg tracking-tight text-white">RetailInsight</span>
+            <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">
+              v1.0
             </span>
           </div>
-          <p className="text-xs text-slate-400 font-medium hidden sm:block">
+          <p className="text-[11px] text-slate-400 font-medium hidden sm:block">
             {user?.businessName || 'Intelligent Retail & Wholesale Platform'}
           </p>
         </div>
       </div>
 
       {/* Right actions */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
+        {/* Open on Phone QR Button */}
+        <button
+          onClick={() => setShowMobileQrModal(true)}
+          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-semibold rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 transition-all active:scale-95"
+          title="Scan QR to open on Phone"
+        >
+          <Smartphone className="w-3.5 h-3.5 text-blue-400" />
+          <span className="hidden sm:inline">Phone QR</span>
+        </button>
+
         {/* Quick POS action for retailer */}
         {role === 'ROLE_RETAILER' && onOpenPos && (
           <button
@@ -80,18 +97,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenPos, onOpenBarcodeTools, l
             className="hidden md:flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-md shadow-emerald-600/20 transition-all active:scale-95"
           >
             <ShoppingCart className="w-4 h-4" />
-            <span>POS Billing Terminal</span>
-          </button>
-        )}
-
-        {/* Barcode tool shortcut */}
-        {onOpenBarcodeTools && (
-          <button
-            onClick={onOpenBarcodeTools}
-            className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60 transition-colors"
-          >
-            <Barcode className="w-4 h-4 text-blue-400" />
-            <span>Barcode Suite</span>
+            <span>POS Billing</span>
           </button>
         )}
 
@@ -99,10 +105,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenPos, onOpenBarcodeTools, l
         <div className="relative">
           <button
             onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${badge.color}`}
+            className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${badge.color}`}
           >
             <BadgeIcon className="w-4 h-4" />
-            <span className="hidden sm:inline">{badge.label}</span>
+            <span className="hidden md:inline">{badge.label}</span>
             <ChevronDown className="w-3.5 h-3.5 opacity-70" />
           </button>
 
@@ -209,6 +215,42 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenPos, onOpenBarcodeTools, l
           )}
         </div>
       </div>
+
+      {/* 📱 Open on Phone QR Code Modal */}
+      {showMobileQrModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in">
+          <div className="glass-card w-full max-w-sm rounded-3xl border border-slate-700 shadow-2xl p-6 relative flex flex-col items-center text-center">
+            <button
+              onClick={() => setShowMobileQrModal(false)}
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 mb-3">
+              <Smartphone className="w-6 h-6" />
+            </div>
+
+            <h3 className="text-base font-bold text-white">Scan to Open on Mobile</h3>
+            <p className="text-xs text-slate-400 mt-1 max-w-xs">
+              Point your phone camera at this QR code to launch RetailInsight on your iPhone or Android.
+            </p>
+
+            <div className="my-4 p-3 bg-white rounded-2xl shadow-xl border border-slate-200">
+              <img src={qrCodeUrl} alt="RetailInsight Mobile QR" className="w-52 h-52 rounded-lg" />
+            </div>
+
+            <p className="font-mono text-[11px] text-blue-400 bg-blue-950/60 px-3 py-1.5 rounded-xl border border-blue-800/60 select-all max-w-full truncate">
+              {liveAppUrl}
+            </p>
+
+            <div className="mt-4 pt-3 border-t border-slate-800 w-full text-[11px] text-slate-400 space-y-1">
+              <p>📱 Supports Camera Barcode Scanning</p>
+              <p>⚡ PWA Installable (Add to Home Screen)</p>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
